@@ -14,8 +14,16 @@ try:
     response = requests.get(url)
     if response.status_code == 200:
         data = response.json()
-        weather = data["weather"]
-        print("Data fetched successfully!")
+        weather_data = {
+            "country": data["sys"]["country"],
+            "city": data["name"],
+            "temp": data["main"]["temp"],
+            "feels_like": data["main"]["feels_like"],
+            "humidity": data["main"]["humidity"],
+            "description": data["weather"][0]["main"],
+            "speed": data["wind"]["speed"],
+        }
+        print(weather_data)
 
 
 except Exception as e:
