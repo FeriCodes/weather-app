@@ -7,8 +7,9 @@ app = Flask(__name__)
 @app.route("/")
 def home():
     weather_info = get_weather_data()
-    if "error" in weather_info:
-        return f"<h1>something went wrong!</h1><p>{weather_info['Error']}"
+
+    if "Error" in weather_info:
+        return f"<h1>something went wrong!</h1><p>{weather_info['Error']}</p>"
 
     return render_template(
         "index.html",
