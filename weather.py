@@ -11,7 +11,7 @@ lon = os.getenv("TARGET_LON")
 url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={API_KEY}&units=metric"
 
 
-def data_structure():
+def get_weather_data():
     try:
         response = requests.get(url)
         if response.status_code == 200:

@@ -3,11 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Weather App</title>
+    <title>Weather App - {{ city_name }}</title>
 </head>
 <body>
-    <h1>🌤️ Weather Dashboard 🌊</h1>
-    <h2>Location: {{ city_name }}</h2>
-    <p>Condition: {{ weather_desc }}</p>
+
+    <div class="weather-card">
+        <h1>🌤️ Weather Dashboard 🌊</h1>
+        <hr>
+
+        <h2>📍 Location: {{ city_name }} ({{ con_name }})</h2>
+        
+        <h3>ℹ️ Condition: {{ weather_desc }}</h3>
+        
+        <div class="weather-details">
+            <p>🌡️ <strong>Temperature:</strong> {{ weather_temp }}°C</p>
+            <p>🤔 <strong>Feels Like:</strong> {{ feels_like }}°C</p>
+            <p>💧 <strong>Humidity:</strong> {{ humidity }}%</p>
+            <p>💨 <strong>Wind Speed:</strong> {{ wind_speed }} m/s</p>
+        </div>
+    </div>
+
 </body>
 </html>
