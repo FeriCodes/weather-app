@@ -1,0 +1,29 @@
+body {
+    background-color: #1e293b;
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    margin: 0;
+}
+
+.weather-card {
+    background-color: #0f172a;
+    color: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 300px;
+    text-align: center;
+}
+
+.weather-card h1 {
+    color: #38bdf8;
+}
+
+.weather-card p {
+    background-color: #1e293b;
+    padding: 10px;
+    margin-bottom: 8px;
+    border-radius: 5px;
+}
