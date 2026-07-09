@@ -13,7 +13,7 @@ url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appi
 
 def get_weather_data():
     try:
-        response = requests.get(url)
+        response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
             weather_data = {
