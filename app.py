@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 from weather import get_weather_data
 
 app = Flask(__name__)
@@ -6,7 +6,9 @@ app = Flask(__name__)
 
 @app.route("/")
 def home():
-    weather_info = get_weather_data()
+    user_location = request.args.get("location") or None
+
+    weather_info = get_weather_data(user_location)
 
     if "Error" in weather_info:
         return f"<h1>something went wrong!</h1><p>{weather_info['Error']}</p>"

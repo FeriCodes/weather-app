@@ -12,6 +12,13 @@
 <div class="weather-card">
     <h1>🌤️ Weather Dashboard</h1>
     <hr>
+
+    <form action="/" method="get" style="margin-bottom: 15px;">
+        <input type="text" name="location" placeholder="City name or coordinates (lat,lon)">
+        <button type="submit">🔍 Search</button>
+        <button type="submit" name="location" value="">🏠 Home</button>
+    </form>
+
     <h2>📍 Location: {{ city_name }} ({{ con_name }})</h2>
     <h3>ℹ️ Condition: {{ weather_desc }}</h3>
     
