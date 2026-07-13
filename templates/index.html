@@ -7,7 +7,7 @@
 
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
-<body>
+<body class="{% if weather_temp %} {% if weather_temp >= 40 %}bg-hot{% elif weather_temp >= 30 %}bg-warm{% elif weather_temp <= 15 %}bg-cold{% else %}bg-cool{% endif %} {% endif %}">
 
 <div class="weather-card">
     <h1>🌤️ Weather Dashboard</h1>

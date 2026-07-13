@@ -71,3 +71,23 @@ body {
     font-size: 16px;
     margin-top: 8px;
 }
+
+.bg-hot {
+    background: linear-gradient(135deg, #d31027, #ea384d) !important;
+}
+
+.bg-warm {
+    background: linear-gradient(135deg, #f12711, #f5af19) !important;
+}
+
+.bg-cool {
+    background: linear-gradient(135deg, #4ca1af, #c4e0e5) !important;
+}
+
+.bg-cold {
+    background: linear-gradient(135deg, #2c3e50, #3498db) !important;
+}
+
+body {
+    transition: background 0.5s ease;
+}
