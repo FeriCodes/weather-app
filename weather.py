@@ -56,6 +56,8 @@ def get_weather_data(location=None):
                 data["sys"]["sunset"], tz=local_offset
             ).strftime("%H:%M")
 
+            wind_speed_kmh = round(data["wind"]["speed"] * 3.6, 1)
+
             weather_data = {
                 "country": data["sys"]["country"],
                 "city": data["name"],
@@ -63,7 +65,7 @@ def get_weather_data(location=None):
                 "feels_like": data["main"]["feels_like"],
                 "humidity": data["main"]["humidity"],
                 "description": data["weather"][0]["main"],
-                "speed": data["wind"]["speed"],
+                "speed": wind_speed_kmh,
                 "sunrise": sunrise_time,
                 "sunset": sunset_time,
                 "aqi": aqi_status,
