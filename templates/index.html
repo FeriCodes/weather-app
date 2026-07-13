@@ -18,6 +18,12 @@
         <button type="submit">🔍 Search</button>
         <button type="submit" name="location" value="">🏠 Home</button>
     </form>
+    
+    {% if error_msg %}
+        <div class="error-box">
+            ⚠️ {{ error_msg }}
+        </div>
+    {% endif %}
 
     <h2>📍 Location: {{ city_name }} ({{ con_name }})</h2>
     <h3>ℹ️ Condition: {{ weather_desc }}</h3>

@@ -12,7 +12,7 @@ def home():
     weather_info = get_weather_data(user_location)
 
     if "Error" in weather_info:
-        return f"<h1>something went wrong!</h1><p>{weather_info['Error']}</p>"
+        return render_template("index.html", error_msg=weather_info["Error"])
 
     return render_template(
         "index.html",
@@ -22,7 +22,7 @@ def home():
         weather_temp=weather_info["temp"],
         feels_like=weather_info["feels_like"],
         humidity=weather_info["humidity"],
-        wind_speed=weather_info["speed"],
+        wind_speed_kmh=weather_info["speed"],
         sunrise_time=weather_info["sunrise"],
         sunset_time=weather_info["sunset"],
         aqi_status=weather_info["aqi"],
