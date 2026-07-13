@@ -23,6 +23,8 @@ def home():
         feels_like=weather_info["feels_like"],
         humidity=weather_info["humidity"],
         wind_speed=weather_info["speed"],
+        sunrise_time=weather_info["sunrise"],
+        sunset_time=weather_info["sunset"],
     )
 
 

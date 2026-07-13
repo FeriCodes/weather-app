@@ -1,6 +1,7 @@
 import os
 import requests
 from dotenv import load_dotenv
+import datetime as dt
 
 load_dotenv()
 
@@ -26,6 +27,15 @@ def get_weather_data(location=None):
         response = requests.get(url, timeout=5)
         if response.status_code == 200:
             data = response.json()
+
+            local_offset = dt.timezone(dt.timedelta(seconds=data["timezone"]))
+            sunrise_time = dt.datetime.fromtimestamp(
+                data["sys"]["sunrise"], tz=local_offset
+            ).strftime("%H:%M")
+            sunset_time = dt.datetime.fromtimestamp(
+                data["sys"]["sunset"], tz=local_offset
+            ).strftime("%H:%M")
+
             weather_data = {
                 "country": data["sys"]["country"],
                 "city": data["name"],
@@ -34,6 +44,8 @@ def get_weather_data(location=None):
                 "humidity": data["main"]["humidity"],
                 "description": data["weather"][0]["main"],
                 "speed": data["wind"]["speed"],
+                "sunrise": sunrise_time,
+                "sunset": sunset_time,
             }
             return weather_data
 
