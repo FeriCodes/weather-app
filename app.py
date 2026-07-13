@@ -25,6 +25,7 @@ def home():
         wind_speed=weather_info["speed"],
         sunrise_time=weather_info["sunrise"],
         sunset_time=weather_info["sunset"],
+        aqi_status=weather_info["aqi"],
     )
 
 

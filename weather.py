@@ -28,6 +28,26 @@ def get_weather_data(location=None):
         if response.status_code == 200:
             data = response.json()
 
+            lat = data["coord"]["lat"]
+            lon = data["coord"]["lon"]
+
+            pollution_url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={API_KEY}"
+            pollution_response = requests.get(pollution_url, timeout=5)
+
+            aqi_status = "Unknown"
+            if pollution_response.status_code == 200:
+                pollution_data = pollution_response.json()
+                aqi_code = pollution_data["list"][0]["main"]["aqi"]
+
+            aqi_mapper = {
+                1: "Good",
+                2: "Fair",
+                3: "Moderate",
+                4: "Poor",
+                5: "Very Poor",
+            }
+            aqi_status = aqi_mapper.get(aqi_code, "Unknown")
+
             local_offset = dt.timezone(dt.timedelta(seconds=data["timezone"]))
             sunrise_time = dt.datetime.fromtimestamp(
                 data["sys"]["sunrise"], tz=local_offset
@@ -46,6 +66,7 @@ def get_weather_data(location=None):
                 "speed": data["wind"]["speed"],
                 "sunrise": sunrise_time,
                 "sunset": sunset_time,
+                "aqi": aqi_status,
             }
             return weather_data
 
