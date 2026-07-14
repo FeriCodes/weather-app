@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from weather import get_weather_data
+from src.weather import get_weather_data
 import os
 
 app = Flask(__name__)
