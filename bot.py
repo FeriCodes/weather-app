@@ -1,14 +1,13 @@
 import os
 import re
-from src.weather import get_weather_data
-from telebot import telebot, types
-
+import telebot
+from telebot import types
 from dotenv import load_dotenv
+from src.weather import get_weather_data
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
 TARGET_LAT = os.getenv("TARGET_LAT")
 TARGET_LON = os.getenv("TARGET_LON")
 
@@ -59,26 +58,29 @@ def send_weather_report(message, query_value, title_name, silent_on_error=False)
 
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
-
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
     btn_my_weather = types.KeyboardButton("🏠 آب و هوای من")
-    markup.add(btn_my_weather)
+    btn_help = types.KeyboardButton("📖 راهنما")
+
+    markup.row(btn_my_weather)
+    markup.row(btn_help)
 
     welcome_text = (
         "سلام من ربات هواشناسی هستم.\n"
-        "برای نحوه استفاده از من، فرمان /help رو بفرستین."
+        "برای دریافت راهنمایی روی دکمه '📖 راهنما' بزنید یا فرمان /help رو بفرستید."
     )
     bot.reply_to(message, welcome_text, reply_markup=markup)
 
 
 @bot.message_handler(commands=["help"])
+@bot.message_handler(func=lambda message: message.text == "📖 راهنما")
 def send_help(message):
     help_text = (
         "برای دریافت اطلاعات هواشناسی فقط کافیه بگید 'weather' یا 'هوا' و پس از اون اسم شهر یا کشور خودتون رو بنویسید مثلا:\n"
         "weather تهران\n"
         "weather Tehran"
     )
-    bot.reply_to(message, help_text)
+    bot.reply_to(message, help_text.strip(), parse_mode="Markdown")
 
 
 @bot.message_handler(func=lambda message: message.text == "🏠 آب و هوای من")
