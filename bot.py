@@ -1,5 +1,5 @@
-from email.mime import message
 import os
+import re
 from src.weather import get_weather_data
 from telebot import telebot, types
 
@@ -66,6 +66,45 @@ def send_my_weather(message):
                 f"🌅 *طلوع آفتاب:* {my_weather['sunrise']}\n"
                 f"🌇 *غروب آفتاب:* {my_weather['sunset']}\n\n"
                 f"🍃 *شاخص پاکی هوا:* {my_weather['aqi']}"
+            )
+            bot.reply_to(message, weather_info, parse_mode="Markdown")
+    except Exception as e:
+        bot.reply_to(message, f"❌ خطایی رخ داد: {str(e)}")
+
+
+@bot.message_handler(regexp=r"^(weather|هوا)\s+(.+)")
+def users_handler(message):
+
+    match = re.match(r"^(weather|هوا)\s+(.+)", message.text, re.IGNORECASE)
+    if not match:
+        return
+
+    city_name = match.group(2).strip()
+    bot.reply_to(message, f"🔍 در حال دریافت اطلاعات آب و هوای {city_name}...")
+
+    try:
+        city_weather = get_weather_data(city_name)
+
+        if "Error" in city_weather:
+            error_msg = city_weather["Error"].lower()
+
+            if "not found" in error_msg or "404" in error_msg:
+                return
+            return bot.reply_to(message, f"❌ خطا: {city_weather['Error']}")
+
+        else:
+            weather_info = (
+                f"📍 *وضعیت آب و هوای شهر {city_name}*\n"
+                f"━━━━━━━━━━━━━━━━━━\n\n"
+                f"🌍 *کشور:* {city_weather['country']} | 🏙️ *شهر:* {city_weather['city']}\n"
+                f"☁️ *آسمان:* {city_weather['description']}\n\n"
+                f"🌡️ *دما:* {city_weather['temp']}°C\n"
+                f"🥵 *دمای احساس‌شده:* {city_weather['feels_like']}°C\n\n"
+                f"💧 *رطوبت:* {city_weather['humidity']}%\n"
+                f"💨 *سرعت باد:* {city_weather['speed']} km/h\n\n"
+                f"🌅 *طلوع آفتاب:* {city_weather['sunrise']}\n"
+                f"🌇 *غروب آفتاب:* {city_weather['sunset']}\n\n"
+                f"🍃 *شاخص پاکی هوا:* {city_weather['aqi']}"
             )
             bot.reply_to(message, weather_info, parse_mode="Markdown")
     except Exception as e:
