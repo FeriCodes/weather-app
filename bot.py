@@ -15,6 +15,48 @@ TARGET_LON = os.getenv("TARGET_LON")
 bot = telebot.TeleBot(BOT_TOKEN)
 
 
+def send_weather_report(message, query_value, title_name, silent_on_error=False):
+    """
+    تابع کمکی و مشترک برای دریافت داده و ارسال گزارش آب‌وهوا.
+    با استفاده از این تابع، از تکرار کد جلوگیری می‌کنیم.
+    """
+    try:
+        weather = get_weather_data(query_value)
+
+        if "Error" in weather:
+            error_msg = weather["Error"].lower()
+            if silent_on_error and ("not found" in error_msg or "404" in error_msg):
+                return
+            return bot.reply_to(message, f"❌ خطا: {weather['Error']}")
+
+        bot.reply_to(message, f"🔍 در حال دریافت اطلاعات آب و هوای {title_name}...")
+
+        weather_info = f"""
+📍 *وضعیت آب و هوای {title_name}*
+━━━━━━━━━━━━━━━━━━
+
+🌍 *کشور:* {weather['country']} | 🏙️ *شهر:* {weather['city']}
+☁️ *آسمان:* {weather['description']}
+
+🌡️ *دما:* {weather['temp']}°C
+🥵 *دمای احساس‌شده:* {weather['feels_like']}°C
+
+💧 *رطوبت:* {weather['humidity']}%
+💨 *سرعت باد:* {weather['speed']} km/h
+
+🌅 *طلوع آفتاب:* {weather['sunrise']}
+🌇 *غروب آفتاب:* {weather['sunset']}
+
+🍃 *شاخص پاکی هوا:* {weather['aqi']}
+"""
+        bot.reply_to(message, weather_info.strip(), parse_mode="Markdown")
+
+    except Exception as e:
+        print(f"Error handling weather request: {e}")
+        if not silent_on_error:
+            bot.reply_to(message, "❌ خطایی در پردازش اطلاعات رخ داد.")
+
+
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
 
@@ -40,75 +82,33 @@ def send_help(message):
 
 
 @bot.message_handler(func=lambda message: message.text == "🏠 آب و هوای من")
-def send_my_weather(message):
+def handle_my_weather(message):
     if not TARGET_LAT or not TARGET_LON:
-        bot.reply_to(message, "موقعیت مکانی شما تنظیم نشده است.❌")
+        bot.reply_to(message, "خطایی غیرمنتظره رخ داد !")
         return
 
-    bot.reply_to(message, "🔍 در حال دریافت اطلاعات آب و هوای خانه شما...")
-    try:
-        my_weather = get_weather_data(f"{TARGET_LAT},{TARGET_LON}")
-        if "Error" in my_weather:
-            return bot.reply_to(
-                message, f"❌ خطا در دریافت اطلاعات هواشناسی: {my_weather['Error']}"
-            )
-        else:
-
-            weather_info = (
-                f"📍 *وضعیت آب و هوای منطقه شما*\n"
-                f"━━━━━━━━━━━━━━━━━━\n\n"
-                f"🌍 *کشور:* {my_weather['country']} | 🏙️ *شهر:* {my_weather['city']}\n"
-                f"☁️ *آسمان:* {my_weather['description']}\n\n"
-                f"🌡️ *دما:* {my_weather['temp']}°C\n"
-                f"🥵 *دمای احساس‌شده:* {my_weather['feels_like']}°C\n\n"
-                f"💧 *رطوبت:* {my_weather['humidity']}%\n"
-                f"💨 *سرعت باد:* {my_weather['speed']} km/h\n\n"
-                f"🌅 *طلوع آفتاب:* {my_weather['sunrise']}\n"
-                f"🌇 *غروب آفتاب:* {my_weather['sunset']}\n\n"
-                f"🍃 *شاخص پاکی هوا:* {my_weather['aqi']}"
-            )
-            bot.reply_to(message, weather_info, parse_mode="Markdown")
-    except Exception as e:
-        bot.reply_to(message, f"❌ خطایی رخ داد: {str(e)}")
+    send_weather_report(
+        message=message,
+        query_value=f"{TARGET_LAT},{TARGET_LON}",
+        title_name="منطقه شما",
+        silent_on_error=False,
+    )
 
 
 @bot.message_handler(regexp=r"^(weather|هوا)\s+(.+)")
-def users_handler(message):
-
+def handle_city_weather(message):
     match = re.match(r"^(weather|هوا)\s+(.+)", message.text, re.IGNORECASE)
     if not match:
         return
 
     city_name = match.group(2).strip()
-    bot.reply_to(message, f"🔍 در حال دریافت اطلاعات آب و هوای {city_name}...")
 
-    try:
-        city_weather = get_weather_data(city_name)
-
-        if "Error" in city_weather:
-            error_msg = city_weather["Error"].lower()
-
-            if "not found" in error_msg or "404" in error_msg:
-                return
-            return bot.reply_to(message, f"❌ خطا: {city_weather['Error']}")
-
-        else:
-            weather_info = (
-                f"📍 *وضعیت آب و هوای شهر {city_name}*\n"
-                f"━━━━━━━━━━━━━━━━━━\n\n"
-                f"🌍 *کشور:* {city_weather['country']} | 🏙️ *شهر:* {city_weather['city']}\n"
-                f"☁️ *آسمان:* {city_weather['description']}\n\n"
-                f"🌡️ *دما:* {city_weather['temp']}°C\n"
-                f"🥵 *دمای احساس‌شده:* {city_weather['feels_like']}°C\n\n"
-                f"💧 *رطوبت:* {city_weather['humidity']}%\n"
-                f"💨 *سرعت باد:* {city_weather['speed']} km/h\n\n"
-                f"🌅 *طلوع آفتاب:* {city_weather['sunrise']}\n"
-                f"🌇 *غروب آفتاب:* {city_weather['sunset']}\n\n"
-                f"🍃 *شاخص پاکی هوا:* {city_weather['aqi']}"
-            )
-            bot.reply_to(message, weather_info, parse_mode="Markdown")
-    except Exception as e:
-        bot.reply_to(message, f"❌ خطایی رخ داد: {str(e)}")
+    send_weather_report(
+        message=message,
+        query_value=city_name,
+        title_name=f"شهر {city_name}",
+        silent_on_error=True,
+    )
 
 
 if __name__ == "__main__":
