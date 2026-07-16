@@ -1,5 +1,6 @@
 import os
 import re
+import time
 import telebot
 from telebot import types
 from dotenv import load_dotenv
@@ -19,16 +20,28 @@ def send_weather_report(message, query_value, title_name, silent_on_error=False)
     تابع کمکی و مشترک برای دریافت داده و ارسال گزارش آب‌وهوا.
     با استفاده از این تابع، از تکرار کد جلوگیری می‌کنیم.
     """
+    temp_msg = None
     try:
+        temp_msg = bot.reply_to(
+            message, f"🔍 در حال دریافت اطلاعات آب و هوای {title_name}..."
+        )
+
         weather = get_weather_data(query_value)
 
         if "Error" in weather:
+            if temp_msg:
+                try:
+                    bot.delete_message(
+                        chat_id=message.chat.id, message_id=temp_msg.message_id
+                    )
+                except Exception:
+                    pass
+
             error_msg = weather["Error"].lower()
             if silent_on_error and ("not found" in error_msg or "404" in error_msg):
                 return
-            return bot.reply_to(message, f"❌ خطا: {weather['Error']}")
 
-        bot.reply_to(message, f"🔍 در حال دریافت اطلاعات آب و هوای {title_name}...")
+            return bot.reply_to(message, f"❌ خطا: {weather['Error']}")
 
         weather_info = f"""
 📍 *وضعیت آب و هوای {title_name}*
@@ -50,8 +63,25 @@ def send_weather_report(message, query_value, title_name, silent_on_error=False)
 """
         bot.reply_to(message, weather_info.strip(), parse_mode="Markdown")
 
+        time.sleep(3)
+
+        if temp_msg:
+            try:
+                bot.delete_message(
+                    chat_id=message.chat.id, message_id=temp_msg.message_id
+                )
+            except Exception as e:
+                print(f"Failed to delete temp message: {e}")
+
     except Exception as e:
         print(f"Error handling weather request: {e}")
+        if temp_msg:
+            try:
+                bot.delete_message(
+                    chat_id=message.chat.id, message_id=temp_msg.message_id
+                )
+            except Exception:
+                pass
         if not silent_on_error:
             bot.reply_to(message, "❌ خطایی در پردازش اطلاعات رخ داد.")
 
