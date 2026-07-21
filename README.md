@@ -25,6 +25,12 @@ In this project, I learned many good things:
 - API (Requests)
 - Python-dotenv
 - HTML and CSS
+- Telebot / Telegram Bot API
+
+## 🌐 Live Demos & Access
+
+- 🖥️ **Web Application:** [weatherapp-7ygj.onrender.com](https://weatherapp-7ygj.onrender.com)
+- 🤖 **Telegram Bot:** [@weather_check_pro_bot](https://t.me/weather_check_pro_bot)
 
 ## ⚙️ How to Run
 
@@ -33,3 +39,5 @@ In this project, I learned many good things:
    pip install -r requirements.txt
 ```
 2. **Run `app.py`** and open the address it shows in your browser something like(`http://localhost:5000`)
+
+
