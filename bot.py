@@ -4,21 +4,19 @@ import time
 import telebot
 from telebot import types
 from dotenv import load_dotenv
-from src.weather import get_weather_data
+from src.weather import Weather
 
 load_dotenv()
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-TARGET_LAT = os.getenv("TARGET_LAT")
-TARGET_LON = os.getenv("TARGET_LON")
-
 bot = telebot.TeleBot(BOT_TOKEN)
+
+weather_client = Weather()
 
 
 def send_weather_report(message, query_value, title_name, silent_on_error=False):
     """
-    تابع کمکی و مشترک برای دریافت داده و ارسال گزارش آب‌وهوا.
-    با استفاده از این تابع، از تکرار کد جلوگیری می‌کنیم.
+    Helper function to fetch data and send the weather report.
     """
     temp_msg = None
     try:
@@ -26,7 +24,8 @@ def send_weather_report(message, query_value, title_name, silent_on_error=False)
             message, f"🔍 در حال دریافت اطلاعات آب و هوای {title_name}..."
         )
 
-        weather = get_weather_data(query_value)
+        # Fetch data using the OOP client
+        weather = weather_client.get_weather_data(query_value)
 
         if "Error" in weather:
             if temp_msg:
@@ -115,13 +114,10 @@ def send_help(message):
 
 @bot.message_handler(func=lambda message: message.text == "🏠 آب و هوای من")
 def handle_my_weather(message):
-    if not TARGET_LAT or not TARGET_LON:
-        bot.reply_to(message, "خطایی غیرمنتظره رخ داد !")
-        return
-
+    # Passes None because the Weather class defaults to TARGET coordinates automatically
     send_weather_report(
         message=message,
-        query_value=f"{TARGET_LAT},{TARGET_LON}",
+        query_value=None,
         title_name="منطقه شما",
         silent_on_error=False,
     )
