@@ -13,24 +13,65 @@ class Weather:
         self.HOME_LAT = os.getenv("TARGET_LAT")
         self.HOME_LON = os.getenv("TARGET_LON")
         self.session = requests.Session()
+        self.BASE_URL = "https://api.openweathermap.org/data/2.5"
 
-    def get_weather_data(self, location=None):
+    def _build_url(self, location):
         lang_param = "fa"
-
         if not location:
-            url = f"https://api.openweathermap.org/data/2.5/weather?lat={self.HOME_LAT}&lon={self.HOME_LON}&appid={self.API_KEY}&units=metric&lang={lang_param}"
+            url = f"{self.BASE_URL}/weather?lat={self.HOME_LAT}&lon={self.HOME_LON}&appid={self.API_KEY}&units=metric&lang={lang_param}"
+
         elif "," in location:
-            try:
-                lat, lon = map(str.strip, location.split(","))
-                url = f"https://api.openweathermap.org/data/2.5/weather?lat={lat}&lon={lon}&appid={self.API_KEY}&units=metric&lang={lang_param}"
-            except ValueError:
-                return {"Error": "Invalid coordinate format. Example: 33.11,46.16"}
+            lat, lon = map(str.strip, location.split(","))
+            url = f"{self.BASE_URL}/weather?lat={lat}&lon={lon}&appid={self.API_KEY}&units=metric&lang={lang_param}"
         else:
             if location.isascii():
                 lang_param = "en"
-
             safe_location = quote(location)
-            url = f"https://api.openweathermap.org/data/2.5/weather?q={safe_location}&appid={self.API_KEY}&units=metric&lang={lang_param}"
+            url = f"{self.BASE_URL}/weather?q={safe_location}&appid={self.API_KEY}&units=metric&lang={lang_param}"
+
+        return url, lang_param
+
+    def _get_aqi_status(self, lat, lon, lang_param):
+        aqi_status = "Unknown" if lang_param == "en" else "نامشخص"
+        pollution_url = (
+            f"{self.BASE_URL}/air_pollution?lat={lat}&lon={lon}&appid={self.API_KEY}"
+        )
+        try:
+            response = self.session.get(pollution_url, timeout=10)
+            if response.status_code == 200:
+                aqi_code = response.json()["list"][0]["main"]["aqi"]
+
+                if lang_param == "en":
+                    aqi_mapper = {
+                        1: "Good",
+                        2: "Fair",
+                        3: "Moderate",
+                        4: "Poor",
+                        5: "Very Poor",
+                    }
+                else:
+                    aqi_mapper = {
+                        1: "عالی",
+                        2: "قابل قبول",
+                        3: "متوسط",
+                        4: "ناسالم",
+                        5: "بسیار خطرناک",
+                    }
+
+                aqi_status = aqi_mapper.get(aqi_code, aqi_status)
+        except Exception:
+            pass
+
+        return aqi_status
+
+    def get_weather_data(self, location=None):
+        if location and "," in location:
+            try:
+                map(float, map(str.strip, location.split(",")))
+            except ValueError:
+                return {"Error": "Invalid coordinate format. Example: 33.11,46.16"}
+
+        url, lang_param = self._build_url(location)
 
         try:
             response = self.session.get(url, timeout=10)
@@ -40,34 +81,7 @@ class Weather:
                 lat = data["coord"]["lat"]
                 lon = data["coord"]["lon"]
 
-                pollution_url = f"https://api.openweathermap.org/data/2.5/air_pollution?lat={lat}&lon={lon}&appid={self.API_KEY}"
-                pollution_response = self.session.get(pollution_url, timeout=10)
-
-                aqi_status = "Unknown" if lang_param == "en" else "نامشخص"
-
-                # FIXED: Moved the mapper and assignment inside the status check
-                if pollution_response.status_code == 200:
-                    pollution_data = pollution_response.json()
-                    aqi_code = pollution_data["list"][0]["main"]["aqi"]
-
-                    if lang_param == "en":
-                        aqi_mapper = {
-                            1: "Good",
-                            2: "Fair",
-                            3: "Moderate",
-                            4: "Poor",
-                            5: "Very Poor",
-                        }
-                    else:
-                        aqi_mapper = {
-                            1: "عالی",
-                            2: "قابل قبول",
-                            3: "متوسط",
-                            4: "ناسالم",
-                            5: "بسیار خطرناک",
-                        }
-
-                    aqi_status = aqi_mapper.get(aqi_code, aqi_status)
+                aqi_status = self._get_aqi_status(lat, lon, lang_param)
 
                 local_offset = dt.timezone(dt.timedelta(seconds=data["timezone"]))
                 sunrise_time = dt.datetime.fromtimestamp(
