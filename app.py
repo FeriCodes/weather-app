@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-from src.weather import get_weather_data
+from src.weather import Weather
 import os
 
 app = Flask(__name__)
@@ -9,7 +9,8 @@ app = Flask(__name__)
 def home():
     user_location = request.args.get("location") or None
 
-    weather_info = get_weather_data(user_location)
+    weather = Weather()
+    weather_info = weather.get_weather_data(user_location)
 
     if "Error" in weather_info:
         return render_template("index.html", error_msg=weather_info["Error"])
