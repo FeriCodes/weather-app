@@ -4,13 +4,14 @@ import os
 
 app = Flask(__name__)
 
+# FIXED: Initialized outside the route to persist the requests.Session()
+weather_client = Weather()
+
 
 @app.route("/")
 def home():
     user_location = request.args.get("location") or None
-
-    weather = Weather()
-    weather_info = weather.get_weather_data(user_location)
+    weather_info = weather_client.get_weather_data(user_location)
 
     if "Error" in weather_info:
         return render_template("index.html", error_msg=weather_info["Error"])
